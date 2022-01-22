@@ -1,7 +1,7 @@
 # Misc Files
 
 # File storing discord bot token.
-#token.json
+token.json
 
 # Logging files
 *.log*
