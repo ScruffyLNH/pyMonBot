@@ -1,3 +1,15 @@
+# Misc Files
+
+# File storing discord bot token.
+#token.json
+
+# Logging files
+*.log*
+
+# Serialized data
+config.json
+ledger.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
