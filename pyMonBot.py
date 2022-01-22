@@ -107,6 +107,10 @@ async def on_ready():
 
 # Commands
 @bot.command()
+async def ping(ctx):
+    await ctx.send('Pong!')
+
+@bot.command()
 @commands.check(isAdmin)
 async def load(ctx, extension):
     """Load a specific cog.
