@@ -69,7 +69,7 @@ if __name__ == "__main__":
         bot.logger.info('No ledger found. Starting clean.')
         bot.ledger = ledger.Ledger()
         _ledger = bot.ledger.json(indent=2)
-        saveData(Constants.LEDGER_FILENAME)
+        saveData(Constants.LEDGER_FILENAME, _ledger)
     else:
         try:
             # Attempt to parse ledger data.
@@ -93,7 +93,7 @@ if __name__ == "__main__":
         # TODO: Dry wet code. Make a general function to generate bot data.
         bot.ledger = ledger.Ledger()
         _ledger = bot.ledger.json(indent=2)
-        saveData(Constants.LEDGER_FILENAME)
+        saveData(Constants.LEDGER_FILENAME, _ledger)
 
 # Check functions
 def isAdmin(ctx):
