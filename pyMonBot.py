@@ -106,9 +106,6 @@ async def on_ready():
     print('Bot is ready!')
 
 # Commands
-@bot.command()
-async def ping(ctx):
-    await ctx.send('Pong!')
 
 @bot.command()
 @commands.check(isAdmin)
