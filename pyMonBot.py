@@ -106,7 +106,6 @@ async def on_ready():
     print('Bot is ready!')
 
 # Commands
-
 @bot.command()
 @commands.check(isAdmin)
 async def load(ctx, extension):
@@ -115,7 +114,14 @@ async def load(ctx, extension):
     Args:
         extension (string): Name of the cog to be loaded
     """
-    return None
+    try:
+        bot.load_extension(f'cogs.{extension}')
+        await ctx.send(f'{extension} has been loaded.')
+    except commands.ExtensionAlreadyLoaded:
+        await ctx.send(f'{extension} has already been loaded.')
+    except commands.ExtensionNotFound:
+        await ctx.send(f'{extension} was not found.')
+
 
 @bot.command()
 @commands.check(isAdmin)
@@ -125,7 +131,12 @@ async def unload(ctx, extension):
     Args:
         extension (string): The name of the cog to be unloaded.
     """
-    return None
+
+    try:    
+        bot.unload_extension(f'cogs.{extension}')
+        await ctx.send(f'{extension} has been unloaded.')
+    except commands.ExtensionNotLoaded:
+        await ctx.send(f'{extension} is already unloaded.')
 
 @bot.command()
 @commands.check(isAdmin)
@@ -135,7 +146,13 @@ async def reload(ctx, extension):
     Args:
         extension (string): Name of the cog to be reloaded.
     """
-    bot.reload_extension(f'cogs.{extension}')
+    try:
+        bot.reload_extension(f'cogs.{extension}')
+        await ctx.send(f'{extension} has been reloaded.')
+    except commands.ExtensionNotLoaded:
+        await ctx.send(f'{extension} is not loaded.')
+    except commands.ExtensionNotFound:
+        await ctx.send(f'{extension} not found.')
 
 # Load cogs
 for filename in os.listdir('./cogs'):
