@@ -14,16 +14,19 @@ class botConfig(commands.Cog):
         """Add superuser by passing users ID for elevated permissions
 
         Args:
-            id (int): superuser Id
+            id (int): superuser ID
         """
 
         user = self.bot.get_user(int(id))
 
         if user:
-            await ctx.send(f'{user.name} has been added to super users.')
-            self.bot.config.superUsers.append(int(id))
-            configData = self.bot.config.json(indent=2)
-            saveData(Constants.CONFIG_DATA_FILENAME, configData)
+            if int(id) not in self.bot.config.superUsers:
+                await ctx.send(f'{user.name} has been added to superusers.')
+                self.bot.config.superUsers.append(int(id))
+                configData = self.bot.config.json(indent=2)
+                saveData(Constants.CONFIG_DATA_FILENAME, configData)
+            else:
+                await ctx.send('User is already a superuser.')
         else:
             await ctx.send('Could not find any user with that ID.')
 
