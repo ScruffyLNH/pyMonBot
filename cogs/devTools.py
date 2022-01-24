@@ -4,7 +4,7 @@ from utility import sendMessagePackets, saveData
 from constants import Constants
 from discord.ext import commands
 
-class DevTools(commands.cog):
+class DevTools(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
