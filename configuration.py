@@ -9,3 +9,4 @@ class Configuration(BaseModel):
     superUsers: List[int] = [] # Users with elevated permissions
     contributerVoiceCategoryName: str = None # The category from wich to pull participants from all VCs.
     serviceCharge: Decimal = 0.005 # Service charge for transactions in the MO.Trader
+    reqMatchRatio: float = 0.7 # A float between 0 and 1 determining matching strictness.
