@@ -4,7 +4,7 @@ from discord.ext import commands
 from utility import saveData
 from constants import Constants
 
-class botConfig(commands.Cog):
+class BotConfig(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
@@ -141,4 +141,4 @@ class botConfig(commands.Cog):
         ctx.author.id in self.bot.config.superUsers)
 
 def setup(bot):
-    bot.add_cog(botConfig(bot))
+    bot.add_cog(BotConfig(bot))
