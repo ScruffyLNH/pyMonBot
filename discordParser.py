@@ -20,12 +20,7 @@ def getVoiceChannelsByCategoryName(ctx, name):
 async def getTrackedVoiceChannels():
     pass
 
-def getShareholders(
-    bot,
-    ctx,
-    excludeBots=False,
-    excludeAuthor=False,
-):
+def getShareholders(bot, ctx):
     
     voiceChannels = getVoiceChannelsByCategoryName(
         ctx,
