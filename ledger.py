@@ -13,8 +13,9 @@ class AssetType(Enum):
 class Contribution(BaseModel):
     
     contibuterId: int = None
-    serverId: int = None
-    serverName: str = None
+    eventId: int = None # eventId will usually be the server id # TODO: Figure out how to handle id's for events that last longer than the default 12h time.
+    messageId: int = None # Id for the message containing the payouts embed.
+    eventName: str = None
     assetType: AssetType
     amount: Decimal
     timeStamp: datetime
