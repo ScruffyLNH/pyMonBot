@@ -1,5 +1,6 @@
 import discord # noqa
 import asyncio
+import discordParser
 from discord.ext import commands
 from utility import saveData
 from constants import Constants
@@ -116,24 +117,20 @@ class BotConfig(commands.Cog):
 
         # TODO: Add checking of roles to command.
 
-        categories = ctx.guild.categories
-        categoryChannel = None
-        for c in categories:
-            if c.name.upper() == self.bot.config.contributerVoiceCategoryName:
-                categoryChannel = c
-                break
-        
-        if categoryChannel:
-            # If exists get active voice connection on server and disconnect.
+        voiceChannels = discordParser.getVoiceChannelsByCategoryName(
+            ctx,
+            self.bot.config.contributerVoiceCategoryName,
+        )
+        if voiceChannels:
             voiceClient = ctx.guild.voice_client
             if voiceClient:
                 await voiceClient.disconnect()
-            for vc in categoryChannel.voice_channels:
+            for vc in voiceChannels:
                 voiceClient = await vc.connect()
                 await asyncio.sleep(0.8)
                 await voiceClient.disconnect()
         else:
-            await ctx.send('Unable to find needed category channel.')
+            await ctx.send('Unable to find needed catrgory channel.')
 
     # Command check for entire cog. Invoker is either admin or superuser.
     def cog_check(self, ctx):
