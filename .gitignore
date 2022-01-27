@@ -10,6 +10,9 @@ token.json
 config.json
 ledger.json
 
+# Project configuration
+.vscode/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
