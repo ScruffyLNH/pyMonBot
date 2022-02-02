@@ -4,7 +4,7 @@ from typing import List
 
 class Configuration(BaseModel):
 
-    LfServerId: int = None # Id of the Legacy Fleet server
+    lfServerId: int = None # Id of the Legacy Fleet server
     adminId: int = 312381318891700224 # Scruffy_90
     superUsers: List[int] = [] # Users with elevated permissions
     contributerVoiceCategoryName: str = None # The category from wich to pull participants from all VCs.
