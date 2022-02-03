@@ -1,7 +1,8 @@
 import discord # noqa
 import asyncio
+from configuration import Configuration, Event
 import discordParser
-from discord.ext import commands
+from datetime import datetime, timezone
 from utility import saveData
 from constants import Constants
 
@@ -109,6 +110,42 @@ class BotConfig(commands.Cog):
         saveData(Constants.CONFIG_DATA_FILENAME, configData)
 
         await ctx.send(f'Voice category name has been set to {cName}')
+
+    @commands.command(name='setEventName')
+    async def setEventName(self, ctx, *, eventName=''):
+        """Set the name of the event. Only use if event is taking place in the
+        Legacy Fleet server.
+
+        Args:
+            eventName (str): The name of the event.
+        """
+        if self.bot.config.userDefinedEvent:
+            if self.bot.config.userDefinedEvent.name == eventName:
+                # Extend lifetime of the user defined event.
+                # TODO: Refactor this. Too convoluted.
+                self.bot.config.userDefinedEvent = Event(
+                    name=eventName,
+                    id=self.bot.config.userDefinedEvent.id,
+                    timeStamp=datetime.now(timezone.utc)
+                )
+                configData = self.bot.config.json(indent=2)
+                saveData(Constants.CONFIG_DATA_FILENAME, configData)
+                await ctx.send(f'"{eventName}" has been extended.')
+                return
+
+        newEvent = Event(
+            name=eventName,
+            id=nextcord.utils.time_snowflake(datetime.now()),
+            # TODO: Test Event with timezone datetime
+            timeStamp=datetime.now(timezone.utc)
+        )
+        self.bot.config.userDefinedEvent = newEvent
+
+        configData = self.bot.config.json(indent=2)
+        saveData(Constants.CONFIG_DATA_FILENAME, configData)
+
+        await ctx.send(f'Event name has been set to "{eventName}"')
+
 
     @commands.command(name='runServerTest')
     async def runServerTest(self, ctx):
