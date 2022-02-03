@@ -1,4 +1,5 @@
 from decimal import Decimal, InvalidOperation
+import nextcord # noqa
     
 async def getVoiceUsers():
     pass

@@ -16,14 +16,14 @@ def loadData(fileName):
         with open(fileName) as f:
             data = json.load(f)
     except AssertionError:
-        logger = logging.getLogger('discord')
+        logger = logging.getLogger('nextcord')
         logger.info(
             'Exception thrown when trying to load data.\n'
             f'Assertion failed: {fileName} should not be empty.\n'
         )
         data = None
     except FileNotFoundError as e:
-        logger = logging.getLogger('discord')
+        logger = logging.getLogger('nextcord')
         logger.info(
             'Exception thrown when trying to load data. '
             'Error message reads:\n'
@@ -48,7 +48,7 @@ def saveData(fileName, data):
         with open(fileName, 'w', encoding='utf-8') as f:
             f.write(data)
     except Exception as e:
-        logger = logging.getLogger('discord')
+        logger = logging.getLogger('nextcord')
         logger.warning(
             'Exception thrown when trying to serialize data. '
             'Error message reads as follows:\n'
@@ -73,7 +73,7 @@ def formatData(obj):
             indent=2
         )
     except Exception as e:
-        logger = logging.getLogger('discord')
+        logger = logging.getLogger('nextcord')
         logger.warning(
             'Exception thrown while attempting to format data. '
             'Error message reads as follows:\n'

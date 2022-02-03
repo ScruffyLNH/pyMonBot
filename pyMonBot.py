@@ -1,27 +1,26 @@
-import discord # noqa
+import nextcord # noqa
 import os
 import logging
 import configuration
 import ledger
 from logging import handlers
-from discord.ext import commands
+from nextcord.ext import commands
 from constants import Constants
 from utility import loadData, saveData
 from pydantic import ValidationError
-from discord.ext import commands
 
 
 if __name__ == "__main__":
-    """Instanciate the discord.py bot and deserialize data.
+    """Instanciate the bot and deserialize data.
     """
     # Generate intents. Why? Because discord, that's why.
-    intents = discord.Intents.default()
+    intents = nextcord.Intents.default()
     intents.members = True
     # Instaciate bot and set the command prefix.
     bot = commands.Bot(Constants.CMD_PREFIX, intents = intents)
 
     # Setup the logger
-    logger = logging.getLogger('discord')
+    logger = logging.getLogger('nextcord')
     logger.setLevel(logging.INFO)
     handler = handlers.RotatingFileHandler(
         filename=Constants.LOG_FILENAME,
@@ -49,6 +48,7 @@ if __name__ == "__main__":
             bot.config = configuration.Configuration.parse_obj(
                 configData
             )
+            
             bot.logger.info(
                 'Config data successfully parsed.'
             )

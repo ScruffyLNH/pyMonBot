@@ -1,8 +1,9 @@
-import discord # noqa
+import nextcord # noqa
 import asyncio
 from configuration import Configuration, Event
 import discordParser
 from datetime import datetime, timezone
+from nextcord.ext import commands
 from utility import saveData
 from constants import Constants
 

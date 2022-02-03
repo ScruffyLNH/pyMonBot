@@ -1,5 +1,4 @@
-#from lib2to3.pytree import Base
-import discord # noqa
+import nextcord # noqa
 from typing import List
 from enum import Enum
 from decimal import Decimal
@@ -49,7 +48,7 @@ class Ledger(BaseModel):
 
     def makeEmbed(ctx):
         # Users should contain payout amounts?
-        e = discord.Embed(
+        e = nextcord.Embed(
             title='Event Name',
             description='~~something~~',
             color=Constants.BOT_COLOR,

@@ -1,10 +1,13 @@
 from datetime import datetime, timezone, timedelta
+import nextcord # noqa
 import discordParser
 import configuration
+from nextcord.ext import commands
 from utility import saveData
 from constants import Constants
 from ledger import AssetType, Contribution, Ledger
 from decimal import Decimal, InvalidOperation
+from nextcord.ext.commands import MissingRequiredArgument
 
 class UserCommands(commands.Cog):
 

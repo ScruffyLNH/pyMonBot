@@ -1,3 +1,4 @@
+import nextcord #noqa
 from datetime import datetime
 from pydantic import BaseModel
 from decimal import Decimal

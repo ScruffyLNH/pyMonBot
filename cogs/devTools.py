@@ -1,8 +1,8 @@
-import discord # noqa
+import nextcord # noqa
 import Levenshtein as lev # Used for fuzzy string matching.
 from utility import sendMessagePackets, saveData
 from constants import Constants
-from discord.ext import commands
+from nextcord.ext import commands
 
 class DevTools(commands.Cog):
 
