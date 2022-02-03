@@ -1,6 +1,14 @@
+from datetime import datetime
 from pydantic import BaseModel
 from decimal import Decimal
 from typing import List
+
+class Event(BaseModel):
+
+    name: str
+    id: int
+    timeStamp: datetime
+
 
 class Configuration(BaseModel):
 
@@ -10,3 +18,5 @@ class Configuration(BaseModel):
     contributerVoiceCategoryName: str = None # The category from wich to pull participants from all VCs.
     serviceCharge: Decimal = 0.005 # Service charge for transactions in the MO.Trader
     reqMatchRatio: float = 0.7 # A float between 0 and 1 determining matching strictness.
+    userDefinedEvent: Event = None
+
