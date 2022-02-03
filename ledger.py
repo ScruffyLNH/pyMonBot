@@ -12,6 +12,17 @@ class AssetType(Enum):
     aUec = 1
     merits = 2
 
+class Person(BaseModel):
+
+    id: int
+    name: str
+    roles: List[str]
+
+
+class ShareHolder(Person):
+
+    moneyOwed: Decimal
+
 class Contribution(BaseModel):
     
     contributerId: int = None
