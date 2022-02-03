@@ -14,6 +14,7 @@ class AssetType(Enum):
 
 class Contribution(BaseModel):
     
+    contributerId: int = None
     eventId: int # eventId will usually be the server id # TODO: Figure out how to handle id's for events that last longer than the default 12h time.
     eventName: str
     assetType: AssetType
