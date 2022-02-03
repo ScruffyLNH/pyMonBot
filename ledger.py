@@ -14,13 +14,13 @@ class AssetType(Enum):
 
 class Contribution(BaseModel):
     
-    contibuterId: int = None
-    eventId: int = None # eventId will usually be the server id # TODO: Figure out how to handle id's for events that last longer than the default 12h time.
-    messageId: int = None # Id for the message containing the payouts embed.
-    eventName: str = None
+    eventId: int # eventId will usually be the server id # TODO: Figure out how to handle id's for events that last longer than the default 12h time.
+    eventName: str
     assetType: AssetType
     amount: Decimal
     timeStamp: datetime
+    messageId: int = None # Id for the message containing the payouts embed.
+    paymentsOutstanding: List[ShareHolder] = [] # Payments outstanding will not mix between events.
 
 
 class Ledger(BaseModel):
