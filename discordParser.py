@@ -28,8 +28,9 @@ def getShareholders(bot, ctx):
     )
 
     shareHolders = []
-    for vc in voiceChannels:
-        shareHolders += vc.members
+    if voiceChannels:
+        for vc in voiceChannels:
+            shareHolders += vc.members
 
     # Exclude any bots and the invoker of the command.
     shareHolders = list(
