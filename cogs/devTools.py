@@ -61,6 +61,7 @@ class DevTools(commands.Cog):
     async def getChannelId(self, ctx):
         """Get the channel id of the channel where command was invoked.
         """
+        await ctx.send(f'This channel\'s ID is: {ctx.channel.id}')
 
     @nextcord.slash_command(
         guild_ids=Constants.TEST_SERVER_IDS,
@@ -141,7 +142,7 @@ class DevTools(commands.Cog):
         else:
             await ctx.send('Unable to find matching user.')
     
-    # Command check for entire cog. Invoker is admin.
+    #Command check for entire cog. Invoker is admin.
     def cog_check(self, ctx):
         return (ctx.author.id == self.bot.config.adminId)
 
