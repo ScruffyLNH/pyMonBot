@@ -293,7 +293,7 @@ class BotConfig(commands.Cog):
         if self.bot.config.superUsers:
             for id in self.bot.config.superUsers:
                 user = self.bot.get_user(id)
-                superUsers += f'{user.name}, id: {id}\n'
+                superUsers += f'{user.name}, ID: {id}\n'
 
             await ctx.send(superUsers)
         else:
