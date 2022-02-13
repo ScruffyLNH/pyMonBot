@@ -263,13 +263,17 @@ class UserCommands(commands.Cog):
     # TODO: Refactor names.
     def distributeShares(self, shareValue, shareUsers, equalShare=False):
         finalDivvys = []
-        for shareMultiplyer in shareUsers:
+        for shareMultiplier in shareUsers:
             if equalShare:
                 divvy = shareValue
             else:
-                divvy = shareMultiplyer * shareValue
-            for user in shareUsers[shareMultiplyer]:
-                finalDivvys.append((user,divvy))
+                divvy = shareMultiplier * shareValue
+            for user in shareUsers[shareMultiplier]:
+                if equalShare:
+                    mp = None
+                else:
+                    mp = shareMultiplier
+                finalDivvys.append((user, divvy, mp))
         
         return finalDivvys
 
