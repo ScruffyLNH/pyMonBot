@@ -139,15 +139,21 @@ class UserCommands(commands.Cog):
 
     async def eventInvalid(self, bot, ctx):
 
+        slashCommand = False
+        if isinstance(ctx, nextcord.Interaction):
+            slashCommand = True
         if not self.bot.config.userDefinedEvent:
             #eventInvalid = True
             mentions = discordParser.getSuperUserMentions(self.bot, ctx)
-            await ctx.send(
+            msg = (
                 'Event name not found. This is required.\n'
                 'Setting event name requires elevated access.\n'
                 'Please specify event name.' + mentions + '\n'
-                'Use !help to see list of available commands.'
             )
+            if slashCommand:
+                await ctx.response.send_message(msg)
+            else:
+                await ctx.send(msg)
             return True
 
         now = datetime.now(timezone.utc)
