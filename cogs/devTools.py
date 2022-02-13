@@ -1,5 +1,7 @@
+from discord import SlashOption
 import nextcord # noqa
 import Levenshtein as lev # Used for fuzzy string matching.
+from nextcord import Interaction
 from utility import sendMessagePackets, saveData
 from constants import Constants
 from nextcord.ext import commands
@@ -9,6 +11,15 @@ class DevTools(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    @nextcord.slash_command(
+        guild_ids=Constants.TEST_SERVER_IDS,
+        name='ping',
+        description='Verify bot is online.',
+        force_global=False, # TODO: Figure out how to set this across cogs.
+    )
+    async def sPing(self, inter: Interaction):
+        await inter.response.send_message('Pong!')
+
     # Commands
     @commands.command()
     async def ping(self, ctx):
@@ -16,23 +27,80 @@ class DevTools(commands.Cog):
         """
         await ctx.send('Pong!')
 
+    @nextcord.slash_command(
+        guild_ids=Constants.TEST_SERVER_IDS,
+        name='get_user_id',
+        description='Get the ID of the user invoking command.',
+        force_global=False,
+    )
+    async def sGetUserId(self, inter: Interaction):
+
+        userId = inter.user.id
+        msg = f'Your user ID is: {userId}'
+        await inter.response.send_message(msg)
+
     @commands.command()
     async def getUserId(self, ctx):
         """Get the discord id for the author of the command message.
         """
         await ctx.send(f'Your user ID is: {ctx.author.id}')
 
+    @nextcord.slash_command(
+        guild_ids=Constants.TEST_SERVER_IDS,
+        name='get_channel_id',
+        description='Get the id of this channel.',
+        force_global=False,
+    )
+    async def sGetChannelId(self, inter: Interaction):
+
+        channelId = inter.channel.id
+        msg = f'This channel\'s ID is: {channelId}'
+        await inter.response.send_message(msg)
+
     @commands.command()
     async def getChannelId(self, ctx):
         """Get the channel id of the channel where command was invoked.
         """
-        await ctx.send(f'This channels ID is: {ctx.channel.id}')
+
+    @nextcord.slash_command(
+        guild_ids=Constants.TEST_SERVER_IDS,
+        name='get_server_id',
+        description='Get the id of this server.',
+        force_global=False,
+    )
+    async def sGetServerId(self, inter: Interaction):
+
+        serverId = inter.guild.id
+        msg = f'The ID of this server is: {serverId}'
+        inter.response.send_message(msg)
+
 
     @commands.command()
     async def getServerId(self, ctx):
         """Get the server id of the server where command was invoked.
         """
         await ctx.send(f'This server\'s ID is: {ctx.guild.id}')
+
+    @nextcord.slash_command(
+        guild_ids=Constants.TEST_SERVER_IDS,
+        name='clear',
+        description='Clear message(s) in current channel.',
+        force_global=False,
+    )
+    async def sClear(
+        self,
+        inter: Interaction,
+        n: int = SlashOption(
+            name='n',
+            description='Number of messages.',
+            default=1,
+            min_value=1,
+            required=False,
+        )
+    ):
+        await inter.response.send_message('clearing')
+        await inter.channel.purge(limit=(n + 1))
+
 
     @commands.command()
     async def clear(self, ctx, amount=1):
