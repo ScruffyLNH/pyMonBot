@@ -122,6 +122,35 @@ class UserCommands(commands.Cog):
 
         # Use markdown to strikethrough payments made.
 
+
+    async def noUsersInVc(self, ctx, numUsers):
+        
+        # TODO: DRY slash command check, maybe make a decorator?
+        if isinstance(ctx, nextcord.Interaction):
+            slashCommand = True
+        else:
+            slashCommand = False
+
+        if numUsers < 1:
+            noUsrStr = (
+                'No users found in voice chat. Make sure at least one '
+                'user other than command invoker is in voice and check '
+                'voice category name in config.'
+            )
+            deleteTime = 15.0
+            if slashCommand:
+                await ctx.response.send_message(
+                    noUsrStr,
+                    delete_after=deleteTime
+                )
+            else:
+                await ctx.send(
+                    noUsrStr,
+                    delete_after=deleteTime
+                )
+            return True
+
+
     async def valueNotRealPositive(self, ctx, value):
         v = -1
         try:
