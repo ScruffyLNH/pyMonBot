@@ -229,9 +229,11 @@ class UserCommands(commands.Cog):
     async def voiceCategoryNameNotSet(self, ctx):
         if not self.bot.config.contributerVoiceCategoryName:
             mentions = discordParser.getSuperUserMentions(self.bot, ctx)
-            await ctx.send(
-                'Voice category name not specified.' + mentions
-            )
+            msg = 'Voice category name not specified.' + mentions
+            if isinstance(ctx, nextcord.Interaction):
+                await ctx.response.send_message(msg)
+            else:
+                await ctx.send(msg)
             return True
 
     def calculateShareValue(self, amount, shareUsers, authorShare, calcFee=True):
