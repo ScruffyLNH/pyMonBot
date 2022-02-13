@@ -14,113 +14,138 @@ class UserCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    # Commands
-    @commands.command(name='share')
-    async def share(self, ctx, amount, equalOption=None):
-        """Divvy up income.
 
-        Args:
-            amount (str): The amount to distribute. (Positive real number)
-            equalOption (str): Pass "equal" as second argument for equal shares.
-        """
-        
-        # Exception handling.
-        if await self.valueNotRealPositive(ctx, amount):
-            return
+    # Slash commands
+    @nextcord.slash_command(
+        guild_ids=Constants.TEST_SERVER_IDS,
+        name='share',
+        description='Share income among users in applicable voice chats.',
+        force_global=False,
+    )
+    async def sShare(
+        self,
+        inter: Interaction,
+        amount: int = SlashOption(
+            name='amount',
+            description='The amount to be shared.',
+            min_value=1,
+        ),
+        equal: bool = SlashOption(
+            name='equal_share',
+            description=
+            'Whether or not to share equally or based on \"rank\" '
+            'Default: False',
+            default=False,
+            required=False,
+        ),
+        transactionFee: float = SlashOption(
+            name='transaction_fee',
+            description= # TODO: Figure out how to update from self.bot.config
+            f'In-game transaction fee. Defaults to 0.005 (0.5%)',
+            default=0.005,
+            required=False,
+            min_value=float(0),
+        ),
+        logContribution: bool = SlashOption(
+            name='log_contribution',
+            description=
+            'Whether or not to save the contribution in ledger. Default: True '
+            '(use False for testing.)',
+            default=True,
+            required=False,
+        ),
+    ):
+        author = inter.user
+        transactionFee = Decimal(transactionFee)
 
-        if ctx.guild.id == self.bot.config.lfServerId:
-            # If in lf server, event name must have been specified to be valid.
-            if await self.eventInvalid(self.bot, ctx):
+        if inter.guild.id == self.bot.config.lfServerId:
+            eventId = self.bot.config.userDefinedEvent.id
+            eventName = self.bot.config.userDefinedEvent.name
+        else:
+            eventId = inter.guild.id
+            eventName = inter.guild.name
+
+        if inter.guild.id == self.bot.config.lfServerId:
+            if await self.eventInvalid(self.bot, inter):
                 return
         
-        if await self.voiceCategoryNameNotSet(ctx):
+        if await self.voiceCategoryNameNotSet(inter):
             return
-
-        # TODO: Make voiceCategoryNotFound
-        # if await self.voiceCategoryNotFound(ctx)
-        #    return
-
-        a = Decimal(amount)
+            
+        # TODO: Make voiceCategoryNotFound Check
 
         # Get all applicable users (No bots, not self)
-        users = discordParser.getShareholders(self.bot, ctx)
+        usersInVoice = discordParser.getUsersInVc(self.bot, inter)
+        if await self.noUsersInVc(inter, len(usersInVoice)):
+            return
 
         # Parse share roles
-        shareUsers = discordParser.parseUsersWithShares(ctx)
-        # Group users according to tier level in a dict.
-        # If users have more than one share role only the highest role will be
-        # counted.
+        shareUsers = discordParser.parseUsersWithShares(inter)
 
-        # TODO: Refactor move to separate methods.
-        keys = sorted(shareUsers, reverse=True)
-        aggregate = set()
-        authorShare = None
-        for myKey in keys:
-            mySet = set(shareUsers[myKey])
-            shareUsers[myKey] = list(mySet - aggregate)
-            aggregate |= mySet
-            if ctx.author in shareUsers[myKey]:
-                authorShare = {myKey: ctx.author}
+        # Reorder shareusers according to share multiplier, and make sure
+        # shareholders are not duplicated into lower multipliers if they have
+        # more than one share multiplier role.
+        shareUsers, authorShare = discordParser.arrangeShareUsers(
+            author,
+            shareUsers,
+        )
 
-        if not authorShare:
-            authorShare = {Decimal(1.0): ctx.author}
         # Filter shareUsers based on users present in VC
-        agg = set()
-        for mKey in keys:
-            mSet = set(shareUsers[mKey])
-            something = set(users).intersection(mSet)
-            agg |= something
-            shareUsers[mKey] = list(something)
-        leftOvers = list(set(users) - agg)
-        # Check if value 1.0 exists
-        v = Decimal(1.0)
-        if v in shareUsers:
-            shareUsers[v] += leftOvers
-        else:
-            shareUsers[v] = leftOvers
+        shareUsers = discordParser.filterVoiceConnected(
+            shareUsers,
+            usersInVoice,
+        )
 
-        #print(authorShare)
-        shareValue = self.calculateShareValue(a, shareUsers, authorShare)
+        shareValue = self.calculateShareValue(
+            Decimal(amount),
+            shareUsers,
+            authorShare,
+            fee=transactionFee,
+            equalOption=equal,
+        )
 
-        equal = False
-        if equalOption:
-            if equalOption.upper() == 'EQUAL':
-                await ctx.send('Equal option selected.')
-                equal = True
-
-        finalDivvy = self.distributeShares(
+        finalDivvys = self.distributeShares(
             shareValue,
             shareUsers,
             equalShare=equal,
         )
 
-        # TODO: Deal with rounding.
-
-        # TODO: When adding reactions only let the command invoker click.
-
-        # TODO: Make sure share embed displays equal/weighted shares.
-
-        if ctx.guild.id == self.bot.config.lfServerId:
-            eventId = self.bot.config.userDefinedEvent.id
-            eventName = self.bot.config.userDefinedEvent.name
-        else:
-            eventId = ctx.guild.id
-            eventName = ctx.guild.name
-
-
-        c = Contribution(
-            contributerId=ctx.author.id,
+        payouts = []
+        for d in finalDivvys:
+            user, divvy, mp = d
+            p = ledger.Payout(
+                outstanding={
+                    'id': user.id,
+                    'name': user.display_name,
+                    'amount': divvy,
+                    'multiplier': mp
+                }
+            )
+            payouts.append(p)
+        
+        c = ledger.Contribution(
+            contributerId=author.id,
             eventId=eventId,
             eventName=eventName,
-            assetType=AssetType.aUec,
-            amount=a,
-            timeStamp=datetime.now(timezone.utc),
+            assetType=ledger.AssetType.aUec, # TODO: Implement option in slash command.
+            amount=amount,
+            payouts=payouts,
+            timeStamp=datetime.now(timezone.utc)
         )
+        if equal:
+            authorDivvy = (shareValue, author.name)
+        else:
+            authorDivvy = (shareValue * next(iter(authorShare)), author.name)
+        settings = {'equal': equal, 'fee': transactionFee}
 
+        # TODO: Add what comd invoker is left with and what goes to trns-act-fee
         # Make a nice embed.
-        await ctx.send(embed=Ledger.makeEmbed(ctx))
-
-        # Use markdown to strikethrough payments made.
+        e, f = ledger.Ledger.makePayoutEmbed(inter, c, settings, authorDivvy)
+        # view = ViewClassName()
+        msg = await inter.response.send_message(embed=e, file=f,)#view=view )
+        #c.messageId = msg.id # TODO: Hmm this is odd. Check how to track interaction msg
+        # await view.wait()
+        # TODO: serialize contribution instance.
 
 
     async def noUsersInVc(self, ctx, numUsers):
