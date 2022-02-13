@@ -14,7 +14,7 @@ if __name__ == "__main__":
     """Instanciate the bot and deserialize data.
     """
     # Generate intents. Why? Because discord, that's why.
-    intents = nextcord.Intents.default()
+    intents = nextcord.Intents.all()
     intents.members = True
     # Instaciate bot and set the command prefix.
     bot = commands.Bot(Constants.CMD_PREFIX, intents = intents)
