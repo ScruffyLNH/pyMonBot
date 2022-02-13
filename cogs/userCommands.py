@@ -8,6 +8,7 @@ from utility import saveData
 from constants import Constants
 from decimal import Decimal, InvalidOperation
 from nextcord.ext.commands import MissingRequiredArgument
+from nextcord import Interaction, SlashOption
 
 class UserCommands(commands.Cog):
 
