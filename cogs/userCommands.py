@@ -236,18 +236,25 @@ class UserCommands(commands.Cog):
                 await ctx.send(msg)
             return True
 
-    def calculateShareValue(self, amount, shareUsers, authorShare, calcFee=True):
+    def calculateShareValue(
+        self,
+        amount,
+        shareUsers,
+        authorShare,
+        fee=Decimal(0),
+        equalOption=False,
+        ):
         
         # Get all shares except for author
         allShares = Decimal(0)
-        for shareMultiplyer in shareUsers:
-            allShares += shareMultiplyer * Decimal(len(shareUsers[shareMultiplyer]))
-        authorShareValue = next(iter(authorShare))
-
-        if calcFee:
-            fee = self.bot.config.serviceCharge
-        else:
-            fee = Decimal(0)
+        for multiplier in shareUsers:
+            numUsers = Decimal(len(shareUsers[multiplier]))
+            if equalOption:
+                allShares += numUsers
+                authorShareValue = 1
+            else:
+                allShares += multiplier * numUsers
+                authorShareValue = next(iter(authorShare))
         
         shareValue = amount/(allShares*(1+fee)+authorShareValue)
         return shareValue
