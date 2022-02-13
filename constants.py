@@ -22,3 +22,9 @@ class Constants:
 
     # Color used for bot theme. Embeds roles etc.
     BOT_COLOR = 0xFFCC00
+
+    # Test server ids (For expedited application commands).
+    TEST_SERVER_IDS = [
+        934539601979273286,
+        936549376040525844,
+    ]
