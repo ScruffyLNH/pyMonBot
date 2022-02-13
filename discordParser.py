@@ -1,5 +1,7 @@
-from decimal import Decimal, InvalidOperation
+from operator import attrgetter, itemgetter
 import nextcord # noqa
+import Levenshtein as Lev
+from decimal import Decimal, InvalidOperation
     
 async def getVoiceUsers():
     pass
@@ -40,6 +42,20 @@ def parseUsersWithShares(ctx):
 
     # Return a dictionary with value and id 
     # i.e role= 1.2x return [{1.2(decimal):ID(int)}]
+def fuzzyMatcher(unordered, sortBy):
+    # Use fuzzy string matching to find nearest match 
+    ratios = [Lev.ratio(u.display_name, sortBy) for u in unordered]
+    # Generate a list of tuples (disp_name, id) by sorting according to ratios.
+    ordered = [
+        (x.display_name, str(x.id)) for _, x in sorted(
+        zip(ratios,unordered),
+        reverse=True,
+        key=itemgetter(0)
+    )
+    ]
+    # Convert list of tuples to dictionary and return.
+    return dict(ordered)
+
 
 def getVoiceChannelsByCategoryName(ctx, name):
     
@@ -58,21 +74,85 @@ def getVoiceChannelsByCategoryName(ctx, name):
 async def getTrackedVoiceChannels():
     pass
 
-def getShareholders(bot, ctx):
-    
+def getUsersInVc(bot, ctx):
+    if isinstance(ctx, nextcord.Interaction):
+        author = ctx.user
+    else:
+        author = ctx.author
     voiceChannels = getVoiceChannelsByCategoryName(
         ctx,
         bot.config.contributerVoiceCategoryName,
     )
 
-    shareHolders = []
+    voiceUsers = []
     if voiceChannels:
         for vc in voiceChannels:
-            shareHolders += vc.members
+            voiceUsers += vc.members
 
     # Exclude any bots and the invoker of the command.
-    shareHolders = list(
-        filter(lambda s: not(s.bot or s.id == ctx.author.id), shareHolders)
+    voiceUsers = list(
+        filter(lambda s: not(s.bot or s.id == author.id), voiceUsers)
     )
 
-    return shareHolders
+    return voiceUsers
+
+def arrangeShareUsers(author, shareUsers):
+    """Reorders shareUsers and exludes shareUsers from any lower share
+    multipliers than their max. Also makes an authorShare for the one invoking
+    the command.
+
+    Args:
+        author (nextcord.Member): Nexcord member instance.
+        shareUsers (Dict): A dictionary arranged by sharemultiplier as keys and
+        list of nextcord.members as values.
+    
+    Returns:
+        Dict, Dict shareUsers, authorShare
+    """
+    
+    shareMultipliers = sorted(shareUsers, reverse=True)
+    aggregate = set()
+    authorShare = None
+    for multiplier in shareMultipliers:
+        suSet = set(shareUsers[multiplier])
+        # Reorder and exclude shareusers that have already been put into a
+        # multiplier key
+        shareUsers[multiplier] = list(suSet - aggregate)
+        aggregate |= suSet
+        if author in shareUsers[multiplier]:
+            authorShare = {multiplier: author}
+    if not authorShare:
+        authorShare = {Decimal(1.0): author}
+
+    return shareUsers, authorShare
+
+
+def filterVoiceConnected(shareUsers, usersInVoice):
+    """Filter shareUsers based on the users present in applicable voice
+    channels.
+
+    Args:
+        shareUsers (Dict): users arranged by shareMultiplier as key.
+        usersInVoice (List): Users connected to applicable voice channel.
+
+    Returns:
+        Dict: Filtered shareUsers
+    """
+    shareMultipliers = sorted(shareUsers, reverse=True)
+    aggregate = set()
+    for multiplier in shareMultipliers:
+        suSet = set(shareUsers[multiplier])
+        shareUsersInVoice = set(usersInVoice).intersection(suSet)
+        shareUsers[multiplier] = list(shareUsersInVoice)
+        aggregate |= shareUsersInVoice
+    leftOvers = list(set(usersInVoice) - aggregate) # Voice users without role.
+
+    # Check if value 1.0 exists as key
+    v = Decimal(1.0)
+    if v in shareUsers:
+        shareUsers[v] += leftOvers
+    else:
+        if leftOvers:
+            shareUsers[v] = leftOvers
+
+    return shareUsers
